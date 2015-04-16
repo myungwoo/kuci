@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block poll_active %} class="active"{% endblock %}
+
+{% block content %}
+<div class="panel panel-success">
+	<div class="panel-heading">
+		<div class="panel-title">
+			<h3>오프라인 투표 정보가 정상적으로 등록되었습니다.</h3>
+		</div>
+	</div>
+	<div class="panel-body">
+		<dl class="dl-horizontal">
+			<dt>학번</dt>
+			<dd>{{ member.number }}</dd>
+			<dt>이름</dt>
+			<dd>{{ member.name }}</dd>
+			<dt>연락처</dt>
+			<dd>{{ member.phone_number }}</dd>
+			<dt>투표 이름</dt>
+			<dd>{{ poll.view_name }}</dd>
+		</dl>
+	</div>
+	<div class="panel-footer">
+		<div class="row">
+			<div class="col-sm-offset-10 col-sm-2">
+				<a class="btn btn-warning" style="width: 100%;" href="/poll/{{ poll.name }}/offline/"><i class="glyphicon glyphicon-arrow-left"></i> 돌아가기</a>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

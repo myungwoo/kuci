@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block main_active %} class="active"{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="/static/css/fullcalendar.min.css">
+{% endblock %}
+
+{% block script %}
+<script src="/static/js/moment.js"></script>
+<script src="/static/js/fullcalendar.min.js"></script>
+<script src="/static/js/fullcalendar-lang.js"></script>
+<script src="/static/js/gcal.js"></script>
+
+<script type="text/javascript">
+$(document).ready(function(){
+	$('#calendar').fullCalendar({
+		lang: 'ko',
+		googleCalendarApiKey: "AIzaSyD4i1K5eNDfY1IKlP6MnrVXtmdPxaujG8o",
+		eventSources: [
+			/*{
+				googleCalendarId: "ko.south_korea#holiday@group.v.calendar.google.com",
+				color: "#fad165",
+				textColor: "black",
+			},*/
+			{
+				// 정보대학 행사
+				googleCalendarId: "ohnqg9e9e4dajr6uaqhhkq825o@group.calendar.google.com",
+				color: "#e3d0d0",
+				textColor: "black",
+			},
+			{
+				// 정보대학 시험기간
+				googleCalendarId: "k3v1icsdrmcu9t197ovlo5ctok@group.calendar.google.com",
+				color: "#d6d6d6",
+				textColor: "black",
+			},
+			{
+				// 동아리 행사
+				googleCalendarId: "ofl7cuqc0d4tq13kug311phhsk@group.calendar.google.com",
+				color: "#d5dece",
+				textColor: "black",
+			}
+		],
+		loading: function(bool){
+			if (bool) {
+				$('#loading').show();
+			}else{
+				$('#loading').hide();
+			}
+		}
+	});
+});
+$('#calendar').on('click', '.fc-event', function(e){
+	e.preventDefault();
+	window.open(jQuery(this).attr('href'), '_blank');
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+	<h1>학생회 달력 <small>각종 일정을 확인할 수 있습니다</small></h1>
+</div>
+<div id="loading" class="text-center">
+	<img src="/static/img/loading.gif" width="150px"></img>
+</div>
+<div id="calendar">
+</div>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block style %}
+<link rel="stylesheet" href="/static/redactor/redactor.css" />
+{% endblock %}
+
+{% block script %}
+<script src="/static/redactor/redactor.js"></script>
+<script src="/static/redactor/ko.js"></script>
+<script src="/static/redactor/plugins/table.js"></script>
+<script src="/static/redactor/plugins/video.js"></script>
+<script src="/static/redactor/plugins/fontcolor.js"></script>
+<script src="/static/redactor/plugins/fontsize.js"></script>
+<script src="/static/redactor/plugins/fullscreen.js"></script>
+<script src="/static/redactor/plugins/filemanager.js"></script>
+<script type="text/javascript">
+$(function(){
+	$('#inputContent').redactor({
+		lang: 'ko',
+		focus: true,
+		minHeight: 300,
+		shortcuts: true,
+		tabSpaces: 4,
+		imageUpload: '/ajax/upload_image/',
+		imageUploadErrorCallback: function(json) {
+			if (json.error_msg) alert(json.error_msg);
+			else alert('이미지 업로드 도중에 오류가 발생했습니다.');
+		},
+		{% if user.is_staff %}
+		fileUpload: '/ajax/upload_file/',
+		fileUploadErrorCallback: function(json) {
+			if (json.error_msg) alert(json.error_msg);
+			else alert('파일 업로드 도중에 오류가 발생했습니다.');
+		},
+		{% endif %}
+		buttonSource: true,
+		plugins: ['underline','scriptbuttons', 'video', 'table', 'fontcolor', 'fontsize', 'fullscreen'],
+		formatting: ['p', 'blockquote']//,
+	    //buttonsHide: ['indent', 'outdent']
+	});
+	$('a[rel="html"]').click(function(){
+		if ($('button[type="submit"]').attr('disabled')){
+			$('button[type="submit"]').removeAttr('disabled');
+		}else{
+			$('button[type="submit"]').attr('disabled', true);
+		}
+	});
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+	<h1>
+		{{ board.view_name }} <small>{{ board.description }}</small>
+	</h1>
+</div>
+
+<form class="form-horizontal" method="POST" action=".">
+	{% csrf_token %}
+	<div class="form-group">
+		<label for="inputTitle" class="col-sm-2 control-label">제목</label>
+		<div class="col-sm-10">
+			<input type="text" class="form-control" id="inputTitle" name="title" placeholder="제목" {% if article %}value="{{ article.title }}" {% endif %}required>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputContent" class="col-sm-2 control-label">제목</label>
+		<div class="col-sm-10">
+			<textarea id="inputContent" name="content">{% if article %}{{ article.content }}{% endif %}</textarea>
+		</div>
+	</div>
+	{% if user.is_staff %}
+	<div class="form-group">
+		<div class="col-sm-offset-2 col-sm-10">
+			<div class="checkbox" style="padding-top: 0px;">
+				<label>
+					<input type="checkbox" name="is_important"{% if article.is_important %} checked{% endif %}> 이 글을 공지사항으로 등록하겠습니다.
+				</label>
+			</div>
+		</div>
+	</div>
+	{% endif %}
+	<div class="form-group text-center">
+		<button type="submit" class="btn btn-success btn-lg"><i class="glyphicon glyphicon-pencil"></i> 글{% if article %}수정{% else %}쓰기{% endif %}</button>
+		<a class="btn btn-warning btn-lg" href="/board/{{ board.name }}/">목록</a>
+	</div>
+</form>
+
+{% endblock %}

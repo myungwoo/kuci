@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block news_active %}{% if board.name == "news" %} class="active"{% endif %}{% endblock %}
+{% block free_active %}{% if board.name == "free" %} class="active"{% endif %}{% endblock %}
+{% block anonymous_active %}{% if board.name == "anonymous" %} class="active"{% endif %}{% endblock %}
+{% block suggest_active %}{% if board.name == "suggest" %} class="active"{% endif %}{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+$(function(){
+	$('[data-toggle="tooltip"]').tooltip();
+})
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+	<h1>
+		{{ board.view_name }} <small>{{ board.description }}</small>
+	</h1>
+</div>
+
+<div class="row">
+	<div class="col-md-12 text-right">
+		<span class="glyphicon glyphicon-list-alt"></span>
+		<span class="text-muted"><strong>Total {{ article_count }}</strong></span>
+	</div>
+</div>
+
+<div class="table-responsive">
+	<table class="table table-condensed table-hover">
+		<thead>
+			<tr>
+				<th class="text-center" style="width: 100px;">번호</th>
+				<th>제목</th>
+				<th style="width: 150px;">글쓴이</th>
+				<th class="text-center" style="width: 150px">날짜</th>
+				<th class="text-center" style="width: 100px;">조회</th> 
+			</tr>
+		</thead>
+		<tbody>
+			{% for article in important_articles %}
+			<tr class="success">
+				<td class="text-center"><span class="glyphicon glyphicon-exclamation-sign text-danger"></span></td>
+				<td>
+					<a href="/board/{{ board.name }}/view/{{ article.num }}/"><strong>{{ article.title }}</strong></a>
+					{% if article.is_new %}<span class="label label-success" data-toggle="tooltip" data-placement="bottom" title="최신">최신</span>{% endif %}
+					{% if article.is_hot %}<span class="glyphicon glyphicon-fire text-danger" data-toggle="tooltip" data-placement="bottom" title="불판!"></span>{% endif %}
+					{% if article.comment_count %}<span class="badge" data-toggle="tooltip" data-placement="bottom" title="댓글 수">{{ article.comment_count }}</span>{% endif %}
+				</td>
+				<td><span class="text-muted"><strong>{{ article.user.first_name }}</strong></span></td>
+				<td class="text-center">{{ article.display_date }}</td>
+				<td class="text-center">{{ article.read_count }}</td>
+			</tr>
+			{% endfor %}
+	{% for article in articles %}
+			<tr>
+				<td class="text-center">{{ article.num }}</td>
+				<td>
+					<a href="/board/{{ board.name }}/view/{{ article.num }}/">{{ article.title }}</a>
+					{% if article.is_new %}<span class="label label-success" data-toggle="tooltip" data-placement="bottom" title="최신">최신</span>{% endif %}
+					{% if article.is_hot %}<span class="glyphicon glyphicon-fire text-danger" data-toggle="tooltip" data-placement="bottom" title="불판!"></span>{% endif %}
+					{% if article.comment_count %}<span class="badge" data-toggle="tooltip" data-placement="bottom" title="댓글 수">{{ article.comment_count }}</span>{% endif %}
+				</td>
+				<td>
+					<span class="text-muted">
+						{% if not board.is_anonymous %}{{ article.user.first_name }}
+						{% else %} -
+						{% endif %}
+					</span>
+				</td>
+				<td class="text-center">{{ article.display_date }}</td>
+				<td class="text-center">{{ article.read_count }}</td>
+			</tr>
+	{% endfor %}
+		</tbody>
+	</table>
+</div>
+<div class="row">
+	<form method="GET" action=".">
+	<div class="col-sm-2">
+		<select name="search_type" class="form-control">
+			<option value="title"{% if get_dict.search_type == "title" %} selected{% endif %}>제목</option>
+			<option value="content"{% if get_dict.search_type == "content" %} selected{% endif %}>내용</option>
+			<option value="title.content"{% if get_dict.search_type == "title.content" %} selected{% endif %}>제목+내용</option>
+			{% if not board.is_anonymous %}
+			<option value="username"{% if get_dict.search_type == "username" %} selected{% endif %}>회원아이디</option>
+			<option value="name"{% if get_dict.search_type == "name" %} selected{% endif %}>글쓴이</option>
+			{% endif %}
+		</select>
+	</div>
+	<div class="col-sm-3">
+		<div class="input-group">
+			<input type="text" name="query" class="form-control" placeholder="검색내용"{% if get_dict.query %} value="{{ get_dict.query }}"{% endif %} autocomplete="off" required>
+			<span class="input-group-btn">
+				<button type="submit" class="btn btn-primary">검색</button>
+			</span>
+		</div>
+	</div>
+</form>
+	<div class="col-sm-offset-5 col-sm-2">
+		{% if is_search %}
+		<a class="btn btn-warning" href="/board/{{ board.name }}/" style="width:100%;"><i class="glyphicon glyphicon-list-alt"></i> 목록</a>
+		{% elif not board.staff_only or user.is_staff %}
+		<a class="btn btn-primary" href="/board/{{ board.name }}/write/" style="width:100%;"><i class="glyphicon glyphicon-pencil"></i> 글쓰기</a>
+		{% endif %}
+	</div>
+</div>
+<div class="row text-center">
+	<ul class="pagination">
+ 		<li{% if page_num == 1 %} class="disabled"{% endif %}><a{% if page_num > 1 %} href="/board/{{ board.id }}/page1/{% if get_parameters %}?{{ get_parameters }}{% endif %}{% endif %}>&laquo;</a></li>
+ 		{% for page in page_nums %}
+ 		<li{% ifequal page page_num %} class="active"{% endifequal %}><a href="/board/{{ board.name }}/page{{ page }}/{% if get_parameters %}?{{ get_parameters }}{% endif %}">{{ page }}</a></li>
+ 		{% endfor %}
+ 		<li{% if page_num == total_page_num %} class="disabled"{% endif %}><a{% if page_num < total_page_num %} href="/board/{{ board.id }}/page{{ total_page_num }}/{% if get_parameters %}?{{ get_parameters }}{% endif %}"{% endif %}>&raquo;</a></li>
+	</ul>
+</div>
+
+{% endblock %}

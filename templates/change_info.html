@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block change_info_active %} class="active"{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+$('button[type="submit"]').click(function(){
+	if ($('#inputPassword').val() != $('#inputPasswordConfirm').val()){
+		$('#password_alert').show(400);
+		return false;
+	}
+});
+
+$('.alert .close').click(function(){
+	$(this).parent().hide(400);
+	return false;
+});
+
+$(function(){
+	$('#password_alert').hide();
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+	<h1>개인정보 변경 <small>비밀번호 변경</small></h1>
+</div>
+<div class="row">
+	<div class="col-lg-offset-2 col-lg-8">
+		<form class="form-horizontal" method="post" action=".">
+			{% csrf_token %}
+			<div class="alert alert-info">
+				<h4>연결된 학사정보란?</h4>
+				<p>
+					매 학기 별로 학사지원부에 학사 정보를 요청하여, 재적생(재학생, 휴학생)인지 확인합니다.<br/>
+					학번, 이름, 연락처 정보를 가져오며, 연락처 변경 희망시 포털에서 연락처를 수정하고 건의사항에 말씀해주세요.<br/>
+				</p>
+				<p>
+					<ul>
+						<li>학생회 정회원: 재학생</li>
+						<li>학생회 준회원: 휴학생</li>
+					</ul>
+				</p>
+			</div>
+			{% if member %}
+			<div class="form-group">
+				<label for="inputNumber" class="col-sm-4 control-label">학번 (Student Number)</label>
+				<div class="col-sm-8">
+					<input type="text" class="form-control" id="inputNumber" value="{{ member.number }}" maxlength="10" disabled>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="inputName" class="col-sm-4 control-label">이름 (Full Name)</label>
+				<div class="col-sm-8">
+					<input type="text" class="form-control" id="inputName" value="{{ member.name }}" maxlength="20" disabled>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="inputPhoneNumber" class="col-sm-4 control-label">연락처 (Phone Number)</label>
+				<div class="col-sm-8">
+					<input type="text" class="form-control" id="inputPhoneNumber" value="{{ member.phone_number }}" maxlength="13" disabled>
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="inputType" class="col-sm-4 control-label">구분 (Classification)</label>
+				<div class="col-sm-8">
+					<input type="text" class="form-control" id="inputType" value="{{ member.get_type_display }}" maxlength="13" disabled>
+				</div>
+			</div>
+			{% else %}
+			<div class="alert alert-danger" role="alert">
+				<span class="glyphicon glyphicon-exclamation-sign" aria-hidden="true"></span>
+				<span class="sr-only">오류!</span>
+				계정과 연결된 학사 정보가 없습니다.
+			</div>
+			{% endif %}
+			<div class="form-group">
+				<label for="inputUsername" class="col-sm-4 control-label">사용자명 (Username)</label>
+				<div class="col-sm-8">
+					<input type="text" class="form-control" id="inputUsername" value="{{ user.username }}" disabled>
+				</div>
+			</div>
+			{% if password_error %}
+			<div class="alert alert-danger alert-dismissible fade in" role="alert">
+				<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<strong>오류!</strong> 입력한 기존 비밀번호가 맞지 않습니다.
+			</div>
+			{% endif %}
+			<div class="form-group">
+				<label for="inputPassword" class="col-sm-4 control-label">기존 비밀번호 (Current Password)</label>
+				<div class="col-sm-8">
+					<input type="password" name="cur_password" class="form-control" id="inputCurPassword" placeholder="기존 비밀번호 (Current Password)" required>
+				</div>
+			</div>
+			<div class="alert alert-danger alert-dismissible fade in" role="alert" id="password_alert">
+				<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<strong>오류!</strong> 입력한 두 비밀번호가 같지 않습니다.
+			</div>
+			<div class="form-group">
+				<label for="inputPassword" class="col-sm-4 control-label">새로운 비밀번호 (New Password)</label>
+				<div class="col-sm-8">
+					<input type="password" name="password1" class="form-control" id="inputPassword" placeholder="새로운 비밀번호 (New Password)">
+				</div>
+			</div>
+			<div class="form-group">
+				<label for="inputPasswordConfirm" class="col-sm-4 control-label">새로운 비밀번호 확인 (New Password Confirm)</label>
+				<div class="col-sm-8">
+					<input type="password" name="password2" class="form-control" id="inputPasswordConfirm" placeholder="새로운 비밀번호 확인 (New Password Confirm)">
+				</div>
+			</div>
+			<div class="form-group" style="margin-bottom: 0px;">
+				<label for="inputEmail" class="col-sm-4 control-label">이메일 주소 (Email Address)</label>
+				<div class="col-sm-8">
+					<input type="email" name="email" class="form-control" id="inputPhoneNumber" placeholder="user@example.com" value="{{ user.email }}" disabled>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-offset-4 col-sm-8">
+					<div class="checkbox" style="padding-top: 0px;">
+						<label>
+							<input type="checkbox" name="get_email"{% if member.get_email %} checked{% endif %}> 각종 학생회 소식, 공지사항 등을 이메일로 받겠습니다.
+						</label>
+					</div>
+				</div>
+			</div>
+			<div class="form-group">
+				<div class="col-sm-4" style="text-align: right;">
+					<a class="btn btn-default" style="width:100%;" href="/">취소</a>
+				</div>
+				<div class="col-sm-8">
+					<button type="submit" class="btn btn-primary" style="width:100%;">바꾸기</button>
+				</div>
+			</div>
+		</form>
+	</div>
+</div>
+{% endblock %}

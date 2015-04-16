@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block style %}
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+$(function(){
+	$('[data-toggle="tooltip"]').tooltip();
+})
+$('.comment_delete').click(function(){
+	if (confirm('댓글을 삭제하시겠습니까?')){
+		window.location.href = $(this).val();
+	}
+	else return false;
+});
+$('.article_delete').click(function(){
+	if (confirm('글을 삭제하시겠습니까?')){
+		window.location.href = $(this).val();
+	}
+	else return false;
+});
+$('#content img').click(function(){
+	window.open($(this).attr('src'));
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+	<h1>
+		{{ board.view_name }} <small>{{ board.description }}</small>
+	</h1>
+</div>
+
+<div class="panel panel-info">
+   	<div class="panel-heading">
+        <h4 class="panel-title">{{ article.title }}　<small><span class="glyphicon glyphicon-calendar"></span> 작성일 : {{ article.display_datetime }} / 조회 : {{ article.read_count }}</small></h4>
+    </div>
+    <div class="panel-body">
+        <span class="glyphicon glyphicon-user"></span> 글쓴이 : <span class="text-muted">{% if not article.is_important and board.is_anonymous %}{{ article.writer_name }}{% else %}{{ article.user.first_name }}{% endif %}</span>
+    </div>
+</div>
+
+<hr />
+
+<div id="content">{{ article.content|safe }}</div>
+
+<hr />
+
+{% for comment in comments %}
+<div class="panel panel-warning">
+	<div class="panel-heading">
+		<span class="text-muted">
+			{% if article.is_important and comment.user == article.user or not board.is_anonymous %}{{ comment.user.first_name }}
+			{% else %}{{ comment.writer_name }}
+			{% endif %}
+		</span>
+		<span class="pull-right">
+			{% if user == comment.user or user.is_staff %}<a class="comment_delete" href="/board/{{ board.name }}/comment/delete/{{ comment.id }}/"><i class="glyphicon glyphicon-remove text-danger"></i></a>{% endif %}
+			{{ comment.display_datetime }}
+		</span>
+	</div>
+	<div class="panel-body">
+		<div style="white-space: pre-line; word-wrap: break-word; word-break: break-all;">{{ comment.content }}</div>
+	</div>
+</div>
+{% endfor %}
+
+<form action="/board/{{ board.name }}/comment/write/{{ article.num }}/" method="POST">
+	{% csrf_token %}
+	<div class="panel panel-warning">
+		<div class="panel-heading">
+			댓글쓰기
+		</div>
+		<div class="panel-body">
+			<div class="row">
+				<div class="col-md-10">
+					<textarea name="content" row="10" style="width: 100%; max-width: 100%; border-radius: 5px;"></textarea>
+				</div>
+				<div class="col-md-2">
+					<button type="submit" class="btn btn-primary btn-lg" style="width: 100%;">쓰기</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+
+<hr />
+
+<div class="clearfix">
+	<ul class="pager pull-left" style="margin:0px;">
+		<li>
+			{% if prev_article %}<a href='/board/{{ board.name }}/view/{{ prev_article.num }}/' title='test'>&larr; 이전글</a>{% endif %}
+		</li>
+		<li>
+			{% if next_article %}<a href='/board/{{ board.name }}/view/{{ next_article.num }}/' title='test'>다음글 &rarr;</a>{% endif %}
+		</li>
+	</ul>
+
+	<div class="pull-right">
+		<span class="btn-group">
+			<a href='/board/{{ board.name }}/' class='btn btn-warning'>목록</a>
+			{% if user == article.user %}
+			<a href='/board/{{ board.name }}/modify/{{ article.num }}/' class='btn btn-info'>수정</a>
+			{% endif %}
+			{% if user == article.user or user.is_staff %}
+			<a href='/board/{{ board.name }}/delete/{{ article.num }}/' class='btn btn-danger article_delete'>삭제</a>
+			{% endif %}
+			{% if not board.staff_only or user.is_staff %}
+			<a href='/board/{{ board.name }}/write/' class='btn btn-primary'><i class='glyphicon glyphicon-pencil'></i> 글쓰기</a>
+			{% endif %}
+		</span>
+	</div>
+</div>
+
+
+{% endblock %}

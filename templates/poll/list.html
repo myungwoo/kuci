@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block poll_active %} class="active"{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+$(function(){
+	$('[data-toggle="tooltip"]').tooltip();
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+	<h1>설문조사 및 투표 <small></small></h1>
+</div>
+{% if polls %}
+{% for poll in polls %}
+<div class="panel panel-info">
+	<div class="panel-heading">
+		<div class="panel-title">
+			<h3>
+				{% if poll in available_polls %}
+					{% if poll in voted_polls %}
+						<i class="glyphicon glyphicon-check" data-toggle="tooltip" data-placement="top" title="투표 완료"></i>
+					{% elif poll.status == "during" %}
+						<i class="glyphicon glyphicon-unchecked" data-toggle="tooltip" data-placement="top" title="투표 가능"></i>
+					{% else %}
+						<i class="glyphicon glyphicon-remove" data-toggle="tooltip" data-placement="top" title="투표 불가능"></i>
+					{% endif %}
+				{% else %}
+				<i class="glyphicon glyphicon-remove" data-toggle="tooltip" data-placement="top" title="투표 불가능"></i>
+				{% endif %}
+				{{ poll.view_name }} <a class="pull-right text-info" href="/poll/{{ poll.name }}/"><i class="glyphicon glyphicon-menu-right"></i></a></h3>
+		</div>
+	</div>
+	<div class="panel-body">
+		<dl class="dl-horizontal">
+			<dt>시작 시간</dt>
+			<dd>{{ poll.display_start_time }}</dd>
+			<dt>종료 시간</dt>
+			<dd>{{ poll.display_end_time }}</dd>
+			<dt>대상</dt>
+			<dd>{% if poll.regular_only %}학생회 정회원{% else %}학생회 정회원 및 준회원{% endif %}</dd>
+			<dt>투표 수단</dt>
+			<dd>{% if poll.do_offline_vote %}온라인 및 오프라인{% else %}온라인{% endif %}</dd>
+			<dt>본인 인증</dt>
+			<dd>{% if poll.need_authentication %}있음{% else %}없음{% endif %}</dd>
+			<dt>선택</dt>
+			<dd>{% if poll.only_choice %}단일 선택{% else %}복수 선택 ({%if poll.maximum_choice_count %}최대 {{ poll.maximum_choice_count }}개{% else %}개수 제한 없음{% endif %}){% endif %}</dd>
+			<dt>투표 종류</dt>
+			<dd>{% if poll.hide_voter %}무기명 투표{% else %}기명 투표{% endif %}</dd>
+			<dt>결과 공개 여부</dt>
+			<dd>{% if poll.result_hide %}비공개{% else %}공개{% endif %}</dd>
+			<dt>상태</dt>
+			<dd>{% if poll.status == "wait" %}시작 전{% elif poll.status == "during" %}진행 중{% else %}종료 됨{% endif %}</dd>
+			{% if poll.status != "wait" %}
+			<dt>투표율</dt>
+			<dd>{{ poll.voted_rate }} <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="학기 별로 유권자 수에 따라 변동이 있을 수 있습니다."></i></dd>
+			{% endif %}
+		</dl>
+	</div>
+</div>
+{% endfor %}
+{% else %}
+<h3 class="text-muted">등록된 설문조사/투표가 없습니다.</h3>
+{% endif %}
+{% endblock %}

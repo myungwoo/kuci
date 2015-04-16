@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block poll_active %} class="active"{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+	$('.glyphicon-remove').click(function(){
+		if (!confirm('정말 삭제하시겠습니까?\n한번 삭제한 것은 다시 복구할 수 없습니다.')){
+			return false;
+		}
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="panel panel-info">
+	<div class="panel-heading">
+		<div class="panel-title">
+			<h3><i class="glyphicon glyphicon-user"></i> {{ poll.view_name }} <small>투표자 명단 ({{ voters|length }}명)</small></h3>
+		</div>
+	</div>
+	{% if voters %}
+	<div class="table-responsive">
+		<table class="table table-hover">
+			<thead>
+				<tr>
+					<th class="text-center">학번</th>
+					<th class="text-center">이름</th>
+					<th class="text-center">구분</th>
+					<th class="text-center">방식</th>
+					<th class="text-center">시간</th>
+					{% if user.is_staff and poll.status == "during" %}
+					<th class="text-center">삭제</th>
+					{% endif %}
+				</tr>
+			</thead>
+			<tbody>
+				{% for voter in voters %}
+				<tr>
+					<td class="text-center">{{ voter.member.number }}</td>
+					<td class="text-center">{{ voter.member.name }}</td>
+					<td class="text-center">{{ voter.member.get_type_display }}</td>
+					<td class="text-center">{% if voter.is_offline %}오프라인{% else %}온라인{% endif %}</td>
+					<td class="text-center">{{ voter.display_datetime }}</td>
+					{% if user.is_staff and poll.status == "during" %}
+					<td class="text-center">{% if voter.is_offline %}<a class="text-danger" href="/poll/{{ poll.name }}/delete_offline_voter/{{ voter.id }}/"><i class="glyphicon glyphicon-remove"></i></a>{% endif %}</td>
+					{% endif %}
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	{% else %}
+	<div class="panel-body">
+		<h4>투표자가 없습니다.</h4>
+	</div>
+	{% endif %}
+	<div class="panel-footer">
+		<div class="row">
+			<div class="col-sm-offset-10 col-sm-2">
+				<a class="btn btn-primary" style="width: 100%;" href="/poll/{{ poll.name }}/"><i class="glyphicon glyphicon-arrow-left"></i> 돌아가기</a>
+			</div>
+		</div>
+	</div>
+</div>
+{% endblock %}

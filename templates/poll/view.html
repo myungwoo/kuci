@@ -1,0 +1,280 @@
+{% extends "base.html" %}
+
+{% block poll_active %} class="active"{% endblock %}
+
+{% block style %}
+<style type="text/css">
+	.panel-body.vote { padding:0px }
+	.panel-body .radio,.panel-body .checkbox {margin-top: 0px;margin-bottom: 0px;}
+	.panel-body .list-group {margin-bottom: 0;}
+	.margin-bottom-none { margin-bottom: 0; }
+	.panel-body .radio label,.panel-body .checkbox label { display:block; }
+</style>
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+	$('button[type="submit"]').click(function(){
+		var count = $('input[name="choice"]:checked').length;
+		if (count == 0){
+			alert('한 가지를 반드시 선택하셔야됩니다.');
+			return false;
+		}
+		{% if not poll.only_choice and poll.maximum_choice_count %}
+		if (count > {{ poll.maximum_choice_count }}){
+			alert('최대 {{ poll.maximum_choice_count }}개까지 선택 가능합니다.');
+			return false;
+		}
+		{% endif %}
+		if (!confirm('정말 투표하시겠습니까?\n한번 투표하시면 결과를 바꿀 수 없습니다.')) return false;
+	});
+	{% if poll.need_authentication %}
+	var reset = function(){
+		$('#sendCode').removeAttr('disabled');
+		$('#authenticationComplete').attr('disabled', true);
+		$('#authenticationCode').attr('disabled', true);
+		$('#authenticationCheck').attr('disabled', true);
+		$('#loading_img').hide();
+		code = '';
+	};
+	$('#authenticateButton').click(function(){
+		reset();
+	});
+	$('#sendCode').click(function(){
+		// 인증 번호 보내기 클릭
+		$('#sendCode').attr('disabled', true);
+		$('#loading_img').show();
+		$.ajax({
+			url: '/ajax/poll/{{ poll.name }}/make_security/',
+			type: 'post',
+			data: {
+				csrfmiddlewaretoken: csrf_token
+			},
+			success: function(rsp){
+				$('#loading_img').hide();
+				if (rsp == 'error'){
+					alert('문자보내는데 에러가 발생했습니다.');
+					$('#sendCode').removeAttr('disabled');
+					$('#sendCode').val('다시 발송');
+				}
+				else if (rsp == 'too many'){
+					alert('연속된 3분에 최대 3개의 문자를 보낼 수 있습니다.');
+					$('#sendCode').removeAttr('disabled');
+					$('#sendCode').val('다시 발송');
+				}
+				else{
+					alert('{{ member.phone_number }}로 본인 인증 번호 문자를 발송하였습니다.');
+					$('#sendCode').removeAttr('disabled');
+					$('#sendCode').val('다시 발송');
+					$('#authenticationCode').removeAttr('disabled');
+					$('#authenticationCheck').removeAttr('disabled');
+				}
+			}
+		});
+	});
+	$('#authenticationCheck').click(function(){
+		// 인증 확인 버튼 클릭
+		code = $('#authenticationCode').val();
+		$.ajax({
+			url: '/ajax/poll/{{ poll.name }}/code_check/',
+			type: 'post',
+			data: {
+				code: code,
+				csrfmiddlewaretoken: csrf_token
+			},
+			success: function(rsp){
+				if (rsp == 'wrong'){
+					alert('틀렸습니다');
+				}
+				else if (rsp == 'unknown'){
+					alert('알 수 없는 문제가 발생했습니다.');
+				}
+				else{
+					alert('본인 인증이 완료되었습니다.');
+					$('#post-code').val(code);
+					$('#authenticateButton').attr('disabled', true);
+					$('#authenticateModal').modal('hide');
+					$('#voteButton').removeAttr('disabled');
+				}
+			}
+		});
+	});
+	{% endif %}
+	$(function(){
+		$('[data-toggle="tooltip"]').tooltip();
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="panel panel-info">
+	<div class="panel-heading">
+		<div class="panel-title">
+			<h3><i class="glyphicon glyphicon-list-alt"></i> {{ poll.view_name }} <small>정보</small></h3>
+		</div>
+	</div>
+	<div class="panel-body">
+		<dl class="dl-horizontal">
+			<dt>시작 시간</dt>
+			<dd>{{ poll.display_start_time }}</dd>
+			<dt>종료 시간</dt>
+			<dd>{{ poll.display_end_time }}</dd>
+			<dt>대상</dt>
+			<dd>{% if poll.regular_only %}학생회 정회원{% else %}학생회 정회원 및 준회원{% endif %}</dd>
+			<dt>투표 수단</dt>
+			<dd>{% if poll.do_offline_vote %}온라인 및 오프라인{% else %}온라인{% endif %}</dd>
+			<dt>본인 인증</dt>
+			<dd>{% if poll.need_authentication %}있음{% else %}없음{% endif %}</dd>
+			<dt>선택</dt>
+			<dd>{% if poll.only_choice %}단일 선택{% else %}복수 선택 ({%if poll.maximum_choice_count %}최대 {{ poll.maximum_choice_count }}개{% else %}개수 제한 없음{% endif %}){% endif %}</dd>
+			<dt>투표 종류</dt>
+			<dd>{% if poll.hide_voter %}무기명 투표{% else %}기명 투표{% endif %}</dd>
+			<dt>결과 공개 여부</dt>
+			<dd>{% if poll.result_hide %}비공개{% else %}공개{% endif %}</dd>
+			<dt>상태</dt>
+			<dd>{% if poll.status == "wait" %}시작 전{% elif poll.status == "during" %}진행 중{% else %}종료 됨{% endif %}</dd>
+			{% if poll.status != "wait" %}
+			<dt>투표율</dt>
+			<dd>{{ poll.voted_rate }} <i class="glyphicon glyphicon-question-sign" data-toggle="tooltip" data-placement="top" title="학기 별로 유권자 수에 따라 변동이 있을 수 있습니다."></i></dd>
+			{% endif %}
+		</dl>
+	</div>
+</div>
+{% if poll.status == "wait" %}
+<div class="text-center">
+	<h3>아직 투표가 시작되지 않았습니다.</h3>
+</div>
+{% elif poll.status == "end" %}
+<div class="text-center">
+	<h3>투표가 종료되었습니다.</h3>
+</div>
+{% elif user_status == 0 %}
+<div class="text-center">
+	<h3>투표 권한이 없습니다.</h3>
+</div>
+{% elif user_status == 2 %}
+<div class="text-center">
+	<h3>투표가 정상적으로 완료되었습니다.</h3>
+</div>
+{% else %}
+<form method="POST" action = ".">
+	{% csrf_token %}
+	{% if poll.need_authentication %}
+	<input type="hidden" id="post-code" name="code" value="">
+	{% endif %}
+	<div class="panel panel-warning">
+		<div class="panel-heading">
+			<div class="panel-title">
+				투표하기 <i class="glyphicon glyphicon-hand-right"></i>
+			</div>
+		</div>
+		<div class="panel-body vote">
+			<ul class="list-group">
+				{% for choice in choices %}
+				<li class="list-group-item">
+					<div class="{% if poll.only_choice %}radio{% else %}checkbox{% endif %}">
+						<label>
+							{% if poll.only_choice %}
+							<input type="radio" name="choice" value="{{ choice.id }}">
+							{% else %}
+							<input type="checkbox" name="choice" value="{{ choice.id }}">
+							{% endif %}
+							{{ choice.title }}
+						</label>
+					</div>
+				</li>
+				{% endfor %}
+			</ul>
+		</div>
+		<div class="panel-footer">
+			<div class="row">
+				<div class="col-sm-offset-8 col-sm-2">
+					{% if poll.need_authentication %}<button type="button" class="btn btn-info" data-toggle="modal" data-target="#authenticateModal" style="width: 100%;" id="authenticateButton">본인인증</a>{% endif %}
+				</div>
+				<div class="col-sm-2">
+					<button type="submit" class="btn btn-success" id="voteButton" style="width: 100%;"{% if poll.need_authentication %} disabled{% endif %}><i class="glyphicon glyphicon-ok"></i> 투표하기</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+{% if poll.need_authentication %}
+<div class="modal fade" id="authenticateModal" tabindex="-1" role="dialog" aria-labelledby="authenticateModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h4 class="modal-title" id="authenticateModalLabel">본인 인증</h4>
+			</div>
+			<div class="modal-body">
+				<div class="text-center">
+					<img src="/static/img/loading.gif" width="100px" id="loading_img" />
+				</div>
+				<dl class="dl-horizontal">
+					<dt>학번</dt>
+					<dd>{{ member.number }}</dd>
+					<dt>이름</dt>
+					<dd>{{ member.name }}</dd>
+					<dt>연락처</dt>
+					<dd>{{ member.phone_number }}</dd>
+				</dl>
+				<div class="row">
+					<div class="col-sm-offset-1 col-sm-3">
+						<button class="btn btn-success" style="width:100%;" id="sendCode">인증번호보내기</button>
+					</div>
+					<div class="col-sm-6">
+						<div class="input-group">
+							<input type="text" class="form-control" id="authenticationCode">
+							<span class="input-group-btn">
+								<button class="btn btn-primary" id="authenticationCheck">인증확인</button>
+							</span>
+						</div>
+					</div>
+					<div class="col-sm-2">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% endif %}
+{% endif %}
+{% if not poll.result_hide or user.is_superuser %}
+<div class="row" style="padding-top: 10px;">
+	<div class="col-sm-offset-4 col-sm-4">
+		<a href="/poll/{{ poll.name }}/result/" class="btn btn-warning btn-lg" style="width: 100%;"><i class="glyphicon glyphicon-stats"></i> 결과 보기</a>
+	</div>
+	<div class="col-sm-4">
+	</div>
+</div>
+{% endif %}
+{% if poll.do_offline_vote and user.is_staff and poll.status == "during" %}
+<div class="row" style="padding-top: 10px;">
+	<div class="col-sm-offset-4 col-sm-4">
+		<a href="/poll/{{ poll.name }}/offline/" class="btn btn-info btn-lg" style="width: 100%;"><i class="glyphicon glyphicon-pencil"></i> 오프라인 투표 관리</a>
+	</div>
+	<div class="col-sm-4">
+	</div>
+</div>
+{% endif %}
+
+{% if user.is_staff %}
+<div class="row" style="padding-top: 10px;">
+	<div class="col-sm-offset-4 col-sm-4">
+		<a href="/poll/{{ poll.name }}/voter_list/" class="btn btn-primary btn-lg" style="width: 100%;"><i class="glyphicon glyphicon-user"></i> 투표자 명단 보기</a>
+	</div>
+	<div class="col-sm-4">
+	</div>
+</div>
+{% endif %}
+<div class="row" style="padding-top: 10px;">
+	<div class="col-sm-offset-4 col-sm-4">
+		<a href="/poll/" class="btn btn-danger btn-lg" style="width: 100%;"><i class="glyphicon glyphicon-arrow-left"></i> 돌아가기</a>
+	</div>
+	<div class="col-sm-4">
+	</div>
+</div>
+{% endblock %}

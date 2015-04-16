@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block poll_active %} class="active"{% endblock %}
+
+{% block script %}
+<script type="text/javascript">
+	$('#checkButton').click(function(){
+		$.ajax({
+			url: '/ajax/poll/{{ poll.name }}/check_voted/',
+			type: 'post',
+			data: {
+				number: $('#inputNumber').val(),
+				name: $('#inputName').val(),
+				csrfmiddlewaretoken: csrf_token
+			},
+			success: function(rsp){
+				if (rsp == 'no member info'){
+					alert('올바르지 않은 학번/이름 조합입니다.\n학생 명단에 등록된 이름으로 기입해주세요.');
+				}else if (rsp == 'not voted'){
+					alert('투표 가능한 학우입니다.');
+					$('#post-number').val($('#inputNumber').val());
+					$('#post-name').val($('#inputName').val());
+					$('#inputNumber').attr('disabled', true);
+					$('#inputName').attr('disabled', true);
+					$('#checkButton').attr('disabled', true);
+					$('#voteButton').removeAttr('disabled');
+				}else if (rsp == 'online'){
+					alert('이미 온라인 투표를 진행했습니다.');
+				}else if (rsp == 'offline'){
+					alert('이미 오프라인 투표를 진행했습니다.');
+				}else if (rsp == 'no permission'){
+					alert('투표권이 없습니다.');
+				}
+			}
+		});
+	});
+	$('#voteButton').click(function(){
+		if (!confirm('투표 정보를 등록하시겠습니까?')){
+			return false;
+		}
+	});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="panel panel-info">
+	<div class="panel-heading">
+		<div class="panel-title">
+			<h3><i class="glyphicon glyphicon-list-alt"></i> {{ poll.view_name }} <small>정보</small></h3>
+		</div>
+	</div>
+	<div class="panel-body">
+		<dl class="dl-horizontal">
+			<dt>시작 시간</dt>
+			<dd>{{ poll.display_start_time }}</dd>
+			<dt>종료 시간</dt>
+			<dd>{{ poll.display_end_time }}</dd>
+			<dt>대상</dt>
+			<dd>{% if poll.regular_only %}학생회 정회원{% else %}학생회 정회원 및 준회원{% endif %}</dd>
+			<dt>투표 수단</dt>
+			<dd>{% if poll.do_offline_vote %}온라인 및 오프라인{% else %}온라인{% endif %}</dd>
+			<dt>본인 인증</dt>
+			<dd>{% if poll.need_authentication %}있음{% else %}없음{% endif %}</dd>
+			<dt>선택</dt>
+			<dd>{% if poll.only_choice %}단일 선택{% else %}복수 선택 ({%if poll.maximum_choice_count %}최대 {{ poll.maximum_choice_count }}개{% else %}개수 제한 없음{% endif %}){% endif %}</dd>
+			<dt>투표 종류</dt>
+			<dd>{% if poll.hide_voter %}무기명 투표{% else %}기명 투표{% endif %}</dd>
+			<dt>결과 공개 여부</dt>
+			<dd>{% if poll.result_hide %}비공개{% else %}공개{% endif %}</dd>
+			<dt>상태</dt>
+			<dd>{% if poll.status == "wait" %}시작 전{% elif poll.status == "during" %}진행 중{% else %}종료 됨{% endif %}</dd>
+			{% if poll.status != "wait" %}
+			<dt>투표율</dt>
+			<dd>{{ poll.voted_rate }}</dd>
+			{% endif %}
+		</dl>
+	</div>
+</div>
+{% if poll.status == "wait" %}
+<div class="text-center">
+	<h3>아직 투표가 시작되지 않았습니다.</h3>
+</div>
+{% elif poll.status == "end" %}
+<div class="text-center">
+	<h3>투표가 종료되었습니다.</h3>
+</div>
+{% else %}
+<form method="POST" action = ".">
+	{% csrf_token %}
+	<input type="hidden" id="post-number" name="number" value="">
+	<input type="hidden" id="post-name" name="name" value="">
+	<div class="panel panel-warning">
+		<div class="panel-heading">
+			<div class="panel-title">
+				오프라인 투표 정보 등록 <i class="glyphicon glyphicon-hand-right"></i>
+			</div>
+		</div>
+		<div class="panel-body">
+			<div class="form-horizontal">
+				<div class="form-group">
+					<label for="inputNumber" class="col-sm-2 control-label">학번</label>
+					<div class="col-sm-10">
+						<input type="text" class="form-control" id="inputNumber" placeholder="학번" maxlength="10" autocomplete="off"required autofocus>
+					</div>
+				</div>
+				<div class="form-group">
+					<label for="inputName" class="col-sm-2 control-label">이름</label>
+					<div class="col-sm-10">
+						<input type="text" class="form-control" id="inputName" placeholder="이름" autocomplete="off" required>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div class="panel-footer">
+			<div class="row">
+				<div class="col-sm-offset-6 col-sm-2">
+					<a class="btn btn-warning" style="width: 100%;" href="/poll/{{ poll.name }}/"><i class="glyphicon glyphicon-arrow-left"></i> 돌아가기</a>
+				</div>
+				<div class="col-sm-2">
+					<button type="button" class="btn btn-info" id="checkButton" style="width: 100%;"><i class="glyphicon glyphicon-question-sign"></i> 투표검사</button>
+				</div>
+				<div class="col-sm-2">
+					<button type="submit" class="btn btn-success" id="voteButton" style="width: 100%;" disabled><i class="glyphicon glyphicon-ok"></i> 투표등록</button>
+				</div>
+			</div>
+		</div>
+	</div>
+</form>
+{% endif %}
+{% endblock %}
