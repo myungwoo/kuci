@@ -5,3 +5,4 @@ member_list*
 reg_member*
 setup*
 *.DS_Store
+static/admin
