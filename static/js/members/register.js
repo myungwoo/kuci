@@ -82,6 +82,7 @@ $('#verifyCheck').click(function(){
 				$('#post-email').val(email);
 				$('#emailModal').modal('hide');
 				$('#emailButton').attr('disabled', true);
+				$('#inputEmail').attr('disabled', true);
 				$('button[type="submit"]').removeAttr('disabled');
 			}else{
 				alert('올바른 인증 코드가 아닙니다.');

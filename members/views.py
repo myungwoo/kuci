@@ -130,17 +130,37 @@ def members_change_info(request):
 		member = None
 	if request.method == 'GET':
 		return render_to_response('change_info.html', RequestContext(request, {'member': member}))
+	user = request.user
 	cur_password = request.POST['cur_password']
 	password = request.POST['password1']
 	if not request.user.check_password(cur_password):
 		return render_to_response('change_info.html', RequestContext(request, {'member': member, 'password_error': True}))
 	get_email = request.POST.get('get_email', 'off')
+	email = request.POST.get('email', '')
+	if email:
+		try:
+			email_verify_new = EmailVerification.objects.get(email=email)
+		except:
+			raise PermissionDenied()
+		try:
+			email_verify_old = EmailVerification.objects.get(email=user.email)
+		except:
+			email_verify_old = None
+		if not email_verify_new.verified or email_verify_new.joined:
+			raise PermissionDenied()
+		user.email = email
+		user.save()
+		email_verify_new.joined = True
+		email_verify_new.save()
+		if email_verify_old:
+			email_verify_old.delete()
+
 	if member:
 		member.get_email = (get_email != 'off')
 		member.save()
 	if password:
-		request.user.set_password(password)
-	request.user.save()
+		user.set_password(password)
+	user.save()
 	return HttpResponseRedirect('/')
 
 def members_privacy(request):

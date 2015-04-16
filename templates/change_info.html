@@ -7,6 +7,7 @@
 
 {% block script %}
 <script type="text/javascript">
+var org_email = '{{ user.email }}', verified = false, email;
 $('button[type="submit"]').click(function(){
 	if ($('#inputPassword').val() != $('#inputPasswordConfirm').val()){
 		$('#password_alert').show(400);
@@ -14,13 +15,96 @@ $('button[type="submit"]').click(function(){
 	}
 });
 
+$('input[type="email"]').keyup(function(){
+	if (verified) return;
+	var now_email = $(this).val();
+	if (now_email == org_email){
+		$('#emailButton').attr('disabled', true);
+		$('button[type="submit"]').removeAttr('disabled');
+	}else{
+		$('#emailButton').removeAttr('disabled');
+		$('button[type="submit"]').attr('disabled', true);
+	}
+});
+
+function validateEmail(email) {
+	var re = /^([\w-]+(?:\.[\w-]+)*)@((?:[\w-]+\.)*\w[\w-]{0,66})\.([a-z]{2,6}(?:\.[a-z]{2})?)$/i;
+	return re.test(email);
+}
+
+var email_reset = function(){
+	$('#email_loading_img').hide();
+	$('#emailAddress').html(email);
+	$('#sendMail').removeAttr('disabled');
+	$('#verifyCode').attr('disabled', true);
+	$('#verifyCheck').attr('disabled', true);
+}
+
+$('#emailButton').click(function(){
+	// 메일인증 버튼 클릭
+	email = $('#inputEmail').val();
+	if (!validateEmail(email)){
+		alert('올바르지 않은 이메일 주소입니다.');
+		return false;
+	}
+	email_reset();
+});
+
+$('#sendMail').click(function(){
+	// 인증 메일 보내기 클릭
+	$('#sendMail').attr('disabled', true);
+	$('#email_loading_img').show();
+	$.ajax({
+		url: '/ajax/members/send_verify_email/',
+		type: 'post',
+		data: {
+			email: email,
+			csrfmiddlewaretoken: csrf_token
+		},
+		success: function(rsp){
+			if (rsp == 'joined'){
+				alert('이미 가입된 이메일 입니다.');
+			}else{
+				alert('메일을 성공적으로 보냈습니다.');
+				$('#email_loading_img').hide();
+				$('#sendMail').val('다시 발송');
+				$('#verifyCode').removeAttr('disabled');
+				$('#verifyCheck').removeAttr('disabled');
+				$('#sendMail').removeAttr('disabled');
+			}
+		}
+	});
+});
+
+$('#verifyCheck').click(function(){
+	var verify_code = $('#verifyCode').val();
+	$.ajax({
+		url: '/ajax/members/check_verify_code/',
+		type: 'post',
+		data: {
+			email: email,
+			code: verify_code,
+			csrfmiddlewaretoken: csrf_token
+		},
+		success: function(rsp){
+			if (rsp == 'yes'){
+				alert('메일 인증이 완료되었습니다.');
+				verified = true;
+				$('#post-email').val(email);
+				$('#emailModal').modal('hide');
+				$('#emailButton').attr('disabled', true);
+				$('#inputEmail').attr('disabled', true);
+				$('button[type="submit"]').removeAttr('disabled');
+			}else{
+				alert('올바른 인증 코드가 아닙니다.');
+			}
+		}
+	});
+});
+
 $('.alert .close').click(function(){
 	$(this).parent().hide(400);
 	return false;
-});
-
-$(function(){
-	$('#password_alert').hide();
 });
 </script>
 {% endblock %}
@@ -33,6 +117,7 @@ $(function(){
 	<div class="col-lg-offset-2 col-lg-8">
 		<form class="form-horizontal" method="post" action=".">
 			{% csrf_token %}
+			<input type="hidden" id="post-email" name="email" value="">
 			<div class="alert alert-info">
 				<h4>연결된 학사정보란?</h4>
 				<p>
@@ -96,7 +181,7 @@ $(function(){
 					<input type="password" name="cur_password" class="form-control" id="inputCurPassword" placeholder="기존 비밀번호 (Current Password)" required>
 				</div>
 			</div>
-			<div class="alert alert-danger alert-dismissible fade in" role="alert" id="password_alert">
+			<div class="alert alert-danger alert-dismissible fade in" role="alert" id="password_alert" style="display:none;">
 				<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
 				<strong>오류!</strong> 입력한 두 비밀번호가 같지 않습니다.
 			</div>
@@ -114,8 +199,13 @@ $(function(){
 			</div>
 			<div class="form-group" style="margin-bottom: 0px;">
 				<label for="inputEmail" class="col-sm-4 control-label">이메일 주소 (Email Address)</label>
-				<div class="col-sm-8">
-					<input type="email" name="email" class="form-control" id="inputPhoneNumber" placeholder="user@example.com" value="{{ user.email }}" disabled>
+				<div class="col-sm-5">
+					<input type="email" class="form-control" id="inputEmail" placeholder="user@example.com" value="{{ user.email }}" autocomplete="off">
+				</div>
+				<div class="col-sm-3">
+					<button type="button" class="btn btn-warning" data-toggle="modal" data-target="#emailModal" style="width: 100%;" id="emailButton" disabled>
+						메일 인증
+					</button>
 				</div>
 			</div>
 			<div class="form-group">
@@ -136,6 +226,43 @@ $(function(){
 				</div>
 			</div>
 		</form>
+	</div>
+</div>
+<div class="modal fade" id="emailModal" tabindex="-1" role="dialog" aria-labelledby="emailModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h3 class="modal-title" id="emailModalLabel">메일 인증</h3>
+			</div>
+			<div class="modal-body">
+				<div class="text-center">
+					<img src="/static/img/loading.gif" width="100px" id="email_loading_img" />
+				</div>
+				<div class="text-center">
+					<h4><i class="fa fa-envelope-o fa-lg"></i> <span id="emailAddress"></span></h4>
+				</div>
+				<hr />
+				<div class="row">
+					<div class="col-sm-offset-1 col-sm-3">
+						<button class="btn btn-success" style="width:100%;" id="sendMail">인증메일보내기</button>
+					</div>
+					<div class="col-sm-6">
+						<div class="input-group">
+							<input type="text" class="form-control" id="verifyCode">
+							<span class="input-group-btn">
+								<button class="btn btn-primary" id="verifyCheck">인증확인</button>
+							</span>
+						</div>
+					</div>
+					<div class="col-sm-2">
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
+			</div>
+		</div>
 	</div>
 </div>
 {% endblock %}
