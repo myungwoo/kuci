@@ -245,7 +245,7 @@
 {% if not poll.result_hide or user.is_superuser %}
 <div class="row" style="padding-top: 10px;">
 	<div class="col-sm-offset-4 col-sm-4">
-		<a href="/poll/{{ poll.name }}/result/" class="btn btn-warning btn-lg" style="width: 100%;"><i class="glyphicon glyphicon-stats"></i> 결과 보기</a>
+		<a href="/poll/{{ poll.name }}/result/" class="btn btn-warning btn-lg btn-block"><i class="glyphicon glyphicon-stats"></i> 결과 보기</a>
 	</div>
 	<div class="col-sm-4">
 	</div>
@@ -254,7 +254,7 @@
 {% if poll.do_offline_vote and user.is_staff and poll.status == "during" %}
 <div class="row" style="padding-top: 10px;">
 	<div class="col-sm-offset-4 col-sm-4">
-		<a href="/poll/{{ poll.name }}/offline/" class="btn btn-info btn-lg" style="width: 100%;"><i class="glyphicon glyphicon-pencil"></i> 오프라인 투표 관리</a>
+		<a href="/poll/{{ poll.name }}/offline/" class="btn btn-info btn-lg btn-block"><i class="glyphicon glyphicon-pencil"></i> 오프라인 투표 관리</a>
 	</div>
 	<div class="col-sm-4">
 	</div>
@@ -264,7 +264,7 @@
 {% if user.is_staff %}
 <div class="row" style="padding-top: 10px;">
 	<div class="col-sm-offset-4 col-sm-4">
-		<a href="/poll/{{ poll.name }}/voter_list/" class="btn btn-primary btn-lg" style="width: 100%;"><i class="glyphicon glyphicon-user"></i> 투표자 명단 보기</a>
+		<a href="/poll/{{ poll.name }}/voter_list/" class="btn btn-primary btn-lg btn-block"><i class="glyphicon glyphicon-user"></i> 투표자 명단 보기</a>
 	</div>
 	<div class="col-sm-4">
 	</div>
@@ -272,7 +272,7 @@
 {% endif %}
 <div class="row" style="padding-top: 10px;">
 	<div class="col-sm-offset-4 col-sm-4">
-		<a href="/poll/" class="btn btn-danger btn-lg" style="width: 100%;"><i class="glyphicon glyphicon-arrow-left"></i> 돌아가기</a>
+		<a href="/poll/" class="btn btn-danger btn-lg btn-block"><i class="glyphicon glyphicon-arrow-left"></i> 돌아가기</a>
 	</div>
 	<div class="col-sm-4">
 	</div>

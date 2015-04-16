@@ -13,7 +13,10 @@ from kuci.functional import *
 
 from django.views.decorators.csrf import csrf_exempt
 
-import string, random, datetime
+import string, random, datetime, json
+
+def JsonResponse(data):
+	return HttpResponse(json.dumps(data), content_type='application/json')
 
 def members_make_security(request):
 	if not request.is_ajax() or request.method != 'POST':
@@ -162,6 +165,56 @@ def members_change_info(request):
 		user.set_password(password)
 	user.save()
 	return HttpResponseRedirect('/')
+
+def members_find_id_pw(request):
+	return render_to_response('find_id_pw.html', RequestContext(request, {}))
+
+def members_ajax_find_id(request):
+	if not request.is_ajax() or request.method != 'POST':
+		raise PermissionDenied()
+	number = request.POST['number']
+	name = request.POST['name']
+	phone_number = request.POST['phone_number']
+
+	try:
+		member = Member.objects.get(number=number, name=name, phone_number=phone_number)
+	except:
+		return JsonResponse({'error': True, 'msg': 'cant find'})
+
+	if not member.user:
+		return JsonResponse({'error': True, 'msg': 'not registered'})
+
+	return JsonResponse({'error': False, 'success': True, 'username': member.user.username})
+
+def members_ajax_find_pw(request):
+	if not request.is_ajax() or request.method != 'POST':
+		raise PermissionDenied()
+
+	number = request.POST['number']
+	name = request.POST['name']
+	phone_number = request.POST['phone_number']
+	username = request.POST['username']
+	email = request.POST['email']
+
+	try:
+		member = Member.objects.get(number=number, name=name, phone_number=phone_number)
+	except:
+		return JsonResponse({'error': True, 'msg': 'cant find'})
+
+	if not member.user:
+		return JsonResponse({'error': True, 'msg': 'not registered'})
+
+	user = member.user
+	if user.username != username:
+		return JsonResponse({'error': True, 'msg': 'wrong username'})
+	if user.email != email:
+		return JsonResponse({'error': True, 'msg': 'wrong email'})
+
+	new_password = ''.join([random.choice(string.ascii_letters) for i in xrange(8)])
+	user.set_password(new_password)
+	user.save()
+	send_new_password_mail(user, new_password)
+	return JsonResponse({'error': False, 'success': True})
 
 def members_privacy(request):
 	return render_to_response('privacy.html', RequestContext(request, {}))

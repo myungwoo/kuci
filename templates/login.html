@@ -9,7 +9,7 @@
 		<meta name="author" content="">
 		<!-- <link rel="icon" href="../../favicon.ico"> -->
 
-		<title>로그인 페이지</title>
+		<title>로그인</title>
 
 		<!-- Bootstrap core CSS -->
 		<link href="/static/css/bootstrap.min.css" rel="stylesheet">
@@ -69,6 +69,13 @@
 				border-bottom-left-radius: 0;
 			}
 			#registerButton {
+				margin-bottom: -5px;
+				border-top-left-radius: 0;
+				border-top-right-radius: 0;
+				border-bottom-left-radius: 0;
+				border-bottom-right-radius: 0;
+			}
+			#findButton {
 				margin-bottom: 10px;
 				border-top-left-radius: 0;
 				border-top-right-radius: 0;
@@ -102,6 +109,7 @@
 				<input type="password" class="form-control" placeholder="{{ form.password.label }}" name="{{ form.password.html_name }}" required />
 				<button class="btn btn-lg btn-block btn-primary" id="loginButton" type="submit">로그인</button>
 				<a class="btn btn-lg btn-block btn-danger" id="registerButton" href="/register/">회원가입</a>
+				<a class="btn btn-lg btn-block btn-info" id="findButton" href="/find_id_pw/">아이디 / 비밀번호 찾기</a>
 			</form>
 		</div> <!-- /container -->
 

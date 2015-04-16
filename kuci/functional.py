@@ -59,3 +59,8 @@ def send_verify_code_mail(email_verify):
 	subject = code_check_email_subject
 	content = code_check_email_content(email_verify.email, email_verify.code)
 	send_gmail(email_verify.email, subject, '', content)
+
+def send_new_password_mail(user, new_password):
+	subject = new_password_email_subject
+	content = new_password_email_content(user, new_password)
+	send_gmail(user.email, subject, '', content)

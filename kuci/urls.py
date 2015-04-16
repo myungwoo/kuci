@@ -27,6 +27,7 @@ urlpatterns = patterns('',
 
 	url(r'^register/$', members_register),
     url(r'^change_info/$', members_change_info),
+    url(r'^find_id_pw/$', members_find_id_pw),
 
     url(r'^admin/', include(admin.site.urls)),
 
@@ -55,6 +56,8 @@ urlpatterns = patterns('',
     url(r'^ajax/members/username_duplication_check/$', members_username_duplication_check),
     url(r'^ajax/members/send_verify_email/$', members_send_verify_email),
     url(r'^ajax/members/check_verify_code/$', members_check_verify_code),
+    url(r'^ajax/members/find_id/$', members_ajax_find_id),
+    url(r'^ajax/members/find_pw/$', members_ajax_find_pw),
 
     url(r'^ajax/upload_image/$', board_upload_image),
     url(r'^ajax/upload_file/$', board_upload_file),
