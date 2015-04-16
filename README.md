@@ -2,7 +2,7 @@
 
 ### 주소: [https://kuci.korea.ac.kr](https://kuci.korea.ac.kr)
 
-## 0. 버전 관리
+## 0. 버전 정보
 ### 개발 환경
 * Django: 1.6.10
 * Python: 2.7
