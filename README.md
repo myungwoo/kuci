@@ -14,6 +14,7 @@
 
 > Django의 기본 설정 파일
 > Database 설정 및 Secret key를 세팅해주어야한다.
+
 * kuci/kuci_settings.py
 
 > 학생회 홈페이지와 관련된 세팅
