@@ -3,13 +3,28 @@
 {% block rent_active %} class="active"{% endblock %}
 
 {% block style %}
+<link rel="stylesheet" href="/static/css/bootstrap-datetimepicker.min.css">
 {% endblock %}
 
 {% block script %}
+<script src="/static/js/moment.js" type="text/javascript"></script>
+<script src="/static/js/locale/ko.js" type="text/javascript"></script>
+<script src="/static/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<script src="/static/js/rent/main.js" type="text/javascript"></script>
 {% endblock %}
 
 {% block content %}
 <div class="page-header">
-	<h1>강의실 대관 <small>각종 일정을 확인할 수 있습니다</small></h1>
+	<h1>강의실 대관 <small>강의실 대관을 온라인으로 할 수 있습니다.</small></h1>
 </div>
+
+<div class="row">
+	<div class="col-md-6">
+		<div id="input-date"></div>
+	</div>
+	<div class="col-md-6">
+		
+	</div>
+</div>
+
 {% endblock %}
