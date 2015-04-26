@@ -4,6 +4,7 @@ from django.contrib import admin
 from members.views import *
 from board.views import *
 from poll.views import *
+from rent.views import *
 from views import *
 
 admin.autodiscover()
@@ -46,6 +47,8 @@ urlpatterns = patterns('',
     url(r'^poll/(?P<poll_name>\w+)/offline/$', poll_offline),
     url(r'^poll/(?P<poll_name>\w+)/voter_list/$', poll_voter_list),
     url(r'^poll/(?P<poll_name>\w+)/delete_offline_voter/(?P<info_id>\d+)/$', poll_delete_offline_voter),
+
+    url(r'^rent/$', rent_main),
 
     url(r'^ajax/poll/(?P<poll_name>\w+)/make_security/$', poll_make_security),
     url(r'^ajax/poll/(?P<poll_name>\w+)/code_check/$', poll_code_check),

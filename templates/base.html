@@ -66,7 +66,7 @@
 						</ul>
 					</li>
 					<li{% block poll_active %}{% endblock %}><a href="/poll/">설문조사 및 투표{% if not_voted_count %} <span class="badge">{{ not_voted_count }}</span>{% endif %}</a></li>
-					<!-- <li{% block class_active %}{% endblock %}><a href="#contact">강의실대관</a></li> -->
+					<li{% block rent_active %}{% endblock %}><a href="/rent/">강의실대관</a></li>
 				</ul>
 				<ul class="nav navbar-nav navbar-right">
 					<li><a href="http://fb.com/kuci.bon" target="_blank"><i class="fa fa-facebook-square fa-lg"></i> Facebook</a></li>
