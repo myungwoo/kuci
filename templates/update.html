@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block members_update_active %} class="active"{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+{% block script %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+	<h1>재적생 갱신 및 등록 <small>재학생, 휴학생 갱신 및 등록</small></h1>
+</div>
+<div class="alert alert-info" role="alert">
+	<h4>참고! <small>명단 작성 방법</small></h4>
+	<p>각 사람 별로 "학번(탭)이름(탭)연락처(줄바꿈)" 형식을 유지해주세요.</p>
+	<p>연락처는 <code>010-xxxx-xxxx</code>, <code>010xxxxxxxx</code>, 혹은 <code>+82 10-xxxx-xxxx</code> 형식으로 기입하셔야합니다.</p>
+	<p>예시:</p>
+	<pre>
+2012210010	전명우	010-0000-0000
+2014210104	전용석	01011111111
+2015410007	Ali-Amir Aldan	+82 10-2222-2222
+</pre>
+	<p>한 학기별로 명단을 한 번에 등록해야합니다. 명단에 없는 사람은 졸업생 혹은 자퇴생으로 구분됩니다.</p>
+	<p>신입생/편입생의 경우 새로 정보가 작성되며, 기존에 이미 정보가 있는 사람은 재적 여부 및 연락처가 변경됩니다.</p>
+</div>
+<form method="POST" action=".">
+	{% csrf_token %}
+	<div class="page-header">
+		<h3>재학생 명단 <small>위에서 설명한 형식에 맞춰 기입해주세요.</small></h3>
+	</div>
+	{% for err in err_list1 %}
+	<div class="alert alert-danger" role="alert">
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		<strong>에러!</strong> {{ err }}
+	</div>
+	{% endfor %}
+	<textarea class="form-control" rows="10" name="member_list1">{{ member_list1 }}</textarea>
+	<div class="page-header">
+		<h3>휴학생 명단 <small>위에서 설명한 형식에 맞춰 기입해주세요.</small></h3>
+	</div>
+	{% for err in err_list2 %}
+	<div class="alert alert-danger" role="alert">
+		<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+		<strong>에러!</strong> {{ err }}
+	</div>
+	{% endfor %}
+	<textarea class="form-control" rows="10" name="member_list2">{{ member_list2 }}</textarea>
+	<hr />
+	<div class="row text-right">
+		<div class="col-md-12">
+			<button type="submit" class="btn btn-lg btn-primary">갱신 및 등록</button>
+		</div>
+	</div>
+</form>
+{% endblock %}

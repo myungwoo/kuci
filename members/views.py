@@ -13,7 +13,7 @@ from kuci.functional import *
 
 from django.views.decorators.csrf import csrf_exempt
 
-import string, random, datetime, json
+import string, random, datetime, json, re
 
 def JsonResponse(data):
 	return HttpResponse(json.dumps(data), content_type='application/json')
@@ -218,3 +218,79 @@ def members_ajax_find_pw(request):
 
 def members_privacy(request):
 	return render_to_response('privacy.html', RequestContext(request, {}))
+
+def check_member_list(member_list, err_list, members):
+	for arr in member_list:
+		if not ''.join(arr):
+			continue
+		if len(arr) != 3:
+			err_list.append(u'형식에 맞지 않는 줄: %s'%('\t'.join(arr)))
+			continue
+		number, name, phone_number = arr
+		try:
+			member = Member.objects.get(number=number)
+		except:
+			member = None
+		if member and member.name != name:
+			err_list.append(u'이전에 입력된 이름과 다름: (기존 이름: %s, 현재 이름: %s)'%(member.name, name))
+			continue
+		if re.match('^\+82 10-\d{4}-\d{4}$', phone_number):
+			phone_number = '010-%s-%s'%(phone_number[7:11], phone_number[12:16])
+		if re.match('^010\d{8}$', phone_number):
+			phone_number = '010-%s-%s'%(phone_number[3:7], phone_number[7:11])
+		if not re.match('^010-\d{4}-\d{4}', phone_number):
+			err_list.append(u'올바르지 않은 연락처 형식: %s'%phone_number)
+			continue
+		members.append([number, name, phone_number])
+
+@login_required
+def members_update(request):
+	user = request.user
+	if not user.is_staff:
+		raise PermissionDenied()
+	if request.method == 'POST':
+		member_list1 = map(lambda x: x.strip().split('\t'), request.POST['member_list1'].split('\n'))
+		member_list2 = map(lambda x: x.strip().split('\t'), request.POST['member_list2'].split('\n'))
+
+		err_list1 = []
+		members1 = []
+		err_list2 = []
+		members2 = []
+		check_member_list(member_list1, err_list1, members1)
+		check_member_list(member_list2, err_list2, members2)
+
+		if err_list1 or err_list2:
+			return render_to_response('update.html', RequestContext(request, {'err_list1': err_list1, 'err_list2': err_list2, 'member_list1': request.POST['member_list1'], 'member_list2': request.POST['member_list2']}))
+
+		for member in Member.objects.filter(type__in=[1, 2]):
+			member.type = 3
+			member.save()
+
+		member_list1 = []
+		for number, name, phone_number in members1:
+			try:
+				member = Member.objects.get(number=number)
+				if member.phone_number != phone_number:
+					member.phone_number = phone_number
+				if member.type != 1:
+					member.type = 1
+			except:
+				member = Member.objects.create(number=number, name=name, phone_number=phone_number)
+			member.save()
+			member_list1.append(member)
+
+		member_list2 = []
+		for number, name, phone_number in members2:
+			try:
+				member = Member.objects.get(number=number)
+				if member.phone_number != phone_number:
+					member.phone_number = phone_number
+				if member.type != 2:
+					member.type = 2
+			except:
+				member = Member.objects.create(number=number, name=name, phone_number=phone_number)
+			member.save()
+			member_list2.append(member)
+		return render_to_response('update_result.html', RequestContext(request, {'members1': member_list1, 'members2': member_list2}))
+
+	return render_to_response('update.html', RequestContext(request, {}))

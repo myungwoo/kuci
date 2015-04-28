@@ -29,6 +29,7 @@ urlpatterns = patterns('',
 	url(r'^register/$', members_register),
     url(r'^change_info/$', members_change_info),
     url(r'^find_id_pw/$', members_find_id_pw),
+    url(r'^members/update/$', members_update),
 
     url(r'^admin/', include(admin.site.urls)),
 

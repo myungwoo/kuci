@@ -7,7 +7,7 @@ class Member(models.Model):
 	MEMBER_TYPE = (\
 		(1, '정회원'),\
 		(2, '준회원'),\
-		(3, '졸업생'),\
+		(3, '졸업생 혹은 자퇴생'),\
 		(4, '교직원'),\
 	)
 	type = models.IntegerField(choices=MEMBER_TYPE, default=2)

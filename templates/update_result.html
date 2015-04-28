@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block members_update_active %} class="active"{% endblock %}
+
+{% block style %}
+{% endblock %}
+
+{% block script %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+	<h1>재적생 갱신 및 등록 <small>결과</small></h1>
+</div>
+
+<div class="alert alert-info" role="alert">
+	<h4>정보!</h4>
+	<p>아래 명단에 있지 않은 모든 학우들의 상태는 졸업생 및 자퇴생으로 바뀌었습니다.</p>
+</div>
+
+<div class="page-header">
+	<h3>재학생 갱신 및 등록 <small>결과</small></h3>
+</div>
+<div class="table-responsive">
+	<table class="table table-hover table-condensed">
+		<thead>
+			<tr>
+				<th class="text-center">학번</th>
+				<th class="text-center">이름</th>
+				<th class="text-center">연락처</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for member in members1 %}
+			<tr>
+				<td class="text-center">{{ member.number }}</td>
+				<td class="text-center">{{ member.name }}</td>
+				<td class="text-center">{{ member.phone_number }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+
+<div class="page-header">
+	<h3>휴학생 갱신 및 등록 <small>결과</small></h3>
+</div>
+<div class="table-responsive">
+	<table class="table table-hover table-condensed">
+		<thead>
+			<tr>
+				<th class="text-center">학번</th>
+				<th class="text-center">이름</th>
+				<th class="text-center">연락처</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for member in members2 %}
+			<tr>
+				<td class="text-center">{{ member.number }}</td>
+				<td class="text-center">{{ member.name }}</td>
+				<td class="text-center">{{ member.phone_number }}</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+{% endblock %}
