@@ -30,8 +30,9 @@ def board_upload_serve(request, path):
 @csrf_exempt
 @login_required
 def board_upload_image(request):
-	if not request.is_ajax() or request.method != 'POST':
+	if request.method != 'POST':
 		raise PermissionDenied()
+	print request.is_ajax(), request.method
 	images = {}
 	for f in request.FILES.getlist('file'):
 		if f.size > 500*1024:
@@ -47,7 +48,7 @@ def board_upload_image(request):
 @csrf_exempt
 @login_required
 def board_upload_file(request):
-	if not request.is_ajax() or request.method != 'POST':
+	if request.method != 'POST':
 		raise PermissionDenied()
 	if not request.user.is_staff:
 		return JsonResponse({'error_msg': u'스태프만 파일 업로드 가능합니다.', 'error': True})
