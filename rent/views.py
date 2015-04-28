@@ -27,7 +27,7 @@ def classroom_hour_writable(classroom, date, hour):
 		h, m = timetable[hour]
 	now = datetime.datetime.now()
 	start_datetime = datetime.datetime(date.year, date.month, date.day, h, m, 0)
-	return start_datetime > now
+	return start_datetime > now and date <= rent_max_date
 
 @login_required
 def rent_main(request):

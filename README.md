@@ -22,3 +22,8 @@ Database 설정 및 Secret key를 세팅해주어야한다.
 > 학생회 홈페이지와 관련된 세팅<br>
 메일을 보내기 위해 gmail 계정 설정을 해주어야한다.<br>
 SMS를 보내기 위해 coolsms 계정 설정을 해주어야한다.
+
+## 2. 기타 설정
+* 이미지 업로드 크기 제한: 500KB (board/views.py)
+* 파일 업로드 크기 제한: 5MB (board/views.py)
+* 강의실 대관 가능 기간: 2015-03-02 ~ 2015-06-19 (rent/views.py)
