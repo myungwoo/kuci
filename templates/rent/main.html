@@ -6,6 +6,11 @@
 <link rel="stylesheet" href="/static/css/bootstrap-datetimepicker.min.css">
 <style type="text/css">
 #loading_img {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin-top: -50px;
+	margin-left: -50px;
 	width: 100px;
 	display: none;
 }
@@ -43,14 +48,13 @@ var max_date = '{{ max_date }}';
 	</div>
 </div>
 
-<div class="row">
+<div class="row" style="position: relative;">
+	<img id="loading_img" src="/static/img/loading.gif" />
 	<div class="col-md-offset-1 col-md-10" id="content">
 	</div>
 </div>
-<div class="row text-center">
-	<img id="loading_img" src="/static/img/loading.gif" />
-</div>
 
+<!-- Rent Form Modal -->
 <div class="modal fade" id="rentModal" tabindex="-1" role="dialog" aria-labelledby="rentModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">

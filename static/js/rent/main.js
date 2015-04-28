@@ -12,11 +12,11 @@ var get_list = function(){
 			csrfmiddlewaretoken: csrf_token
 		},
 		success: function(rsp){
+			$('#loading_img').hide();
 			$('#content').html(rsp);
 			$('[data-toggle="tooltip"]').tooltip();
 		}
 	});
-	$('#loading_img').hide();
 };
 
 $(function(){
