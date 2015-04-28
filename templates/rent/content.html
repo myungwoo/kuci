@@ -14,10 +14,10 @@
 			<tr>
 				<td class="text-center">{{ row.hour }}{% if classroom.type == 1 %}교시{% else %}시{% endif %}</td>
 				{% if row.rentinfo %}
-				<td class="text-center">{{ row.rentinfo.user.first_name }}</td>
+				<td class="text-center">{% if row.rentinfo.user %}{{ row.rentinfo.user.first_name }}{% else %}없음{% endif %}</td>
 				<td class="text-center">{{ row.rentinfo.reason }}</td>
 				<td class="text-center">
-					{% if valid or user.is_staff %}
+					{% if row.valid or user.is_staff %}
 					{% if row.rentinfo.user == user or user.is_staff %}
 					<a role="button" href="javascript:write_rentinfo({{ row.rentinfo.id }}, {{ row.hour }}, '{{ row.hour }}{% if classroom.type == 1 %}교시{% else %}시{% endif %}');"><i class="glyphicon glyphicon-pencil" data-toggle="tooltip" data-placement="top" title="대관 수정"></i></a>
 					<a role="button" class="text-danger" href="javascript:delete_rentinfo({{ row.rentinfo.id }});"><i class="glyphicon glyphicon-remove" data-toggle="tooltip" data-placement="top" title="대관 삭제"></i></a>
@@ -28,7 +28,7 @@
 				<td></td>
 				<td></td>
 				<td class="text-center">
-					{% if valid or user.is_staff %}
+					{% if row.valid or user.is_staff %}
 					<a role="button" class="text-muted" href="javascript:write_rentinfo(0, {{ row.hour }}, '{{ row.hour }}{% if classroom.type == 1 %}교시{% else %}시{% endif %}');"><i class="glyphicon glyphicon-tags" data-toggle="tooltip" data-placement="top" title="대관하기"></i></a>
 					{% endif %}
 				</td>

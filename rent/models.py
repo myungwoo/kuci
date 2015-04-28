@@ -20,10 +20,10 @@ class ClassRoom(models.Model):
 
 class RentInfo(models.Model):
 	classroom = models.ForeignKey(ClassRoom)
-	user = models.ForeignKey(User)
+	user = models.ForeignKey(User, blank=True, null=True)
 	date = models.DateField(default=datetime.date.today())
 	reason = models.CharField(max_length=200)
 	hour = models.IntegerField(default=1)
 
 	def __unicode__(self):
-		return u'''%s rent classroom %s at %s''' % (unicode(self.user.first_name), unicode(self.classroom.display_name), unicode(self.hour))
+		return u'''%s rent classroom %s at %s''' % (unicode(self.user.first_name) if self.user else 'Unknown', unicode(self.classroom.display_name), unicode(self.hour))
