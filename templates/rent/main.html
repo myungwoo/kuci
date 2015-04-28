@@ -4,27 +4,123 @@
 
 {% block style %}
 <link rel="stylesheet" href="/static/css/bootstrap-datetimepicker.min.css">
+<style type="text/css">
+#loading_img {
+	width: 100px;
+	display: none;
+}
+</style>
 {% endblock %}
 
 {% block script %}
 <script src="/static/js/moment.js" type="text/javascript"></script>
 <script src="/static/js/locale/ko.js" type="text/javascript"></script>
 <script src="/static/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+var min_date = '{{ min_date }}';
+var max_date = '{{ max_date }}';
+</script>
 <script src="/static/js/rent/main.js" type="text/javascript"></script>
 {% endblock %}
 
 {% block content %}
 <div class="page-header">
-	<h1>강의실 대관 <small>강의실 대관을 온라인으로 할 수 있습니다.</small></h1>
+	<h1>강의실 대관 <small>정보통신관 강의실 대관을 온라인으로 할 수 있습니다.</small></h1>
 </div>
 
 <div class="row">
 	<div class="col-md-6">
+		<h4 class="text-center">날짜 선택</h4>
 		<div id="input-date"></div>
 	</div>
 	<div class="col-md-6">
-		
+		<h4 class="text-center">강의실 목록</h4>
+		<ul class="nav nav-pills">
+			{% for classroom in classrooms %}
+			<li role="presentation"  classroom-id="{{ classroom.id }}"{% if forloop.first %} class="active"{% endif %}><a role="button">{{ classroom.display_name }}{% if classroom.type == 2 %}(세미나실){% endif %} / {{ classroom.room_size }}석</a></li>
+			{% endfor %}
+		</ul>
 	</div>
 </div>
 
+<div class="row">
+	<div class="col-md-offset-1 col-md-10" id="content">
+	</div>
+</div>
+<div class="row text-center">
+	<img id="loading_img" src="/static/img/loading.gif" />
+</div>
+
+<div class="modal fade" id="rentModal" tabindex="-1" role="dialog" aria-labelledby="rentModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h3 class="modal-title" id="rentModalLabel">강의실 대관</h3>
+			</div>
+			<div class="modal-body">
+				<div class="form-horizontal">
+					<div class="form-group">
+						<label for="inputDate" class="col-sm-2 control-label">대관 날짜</label>
+						<div class="col-sm-10">
+							<input type="text" class="form-control" id="inputDate" disabled>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="inputClassroom" class="col-sm-2 control-label">강의실</label>
+						<div class="col-sm-10">
+							<input type="text" class="form-control" id="inputClassroom" disabled>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="inputHour" class="col-sm-2 control-label">대관 시간</label>
+						<div class="col-sm-10">
+							<input type="text" class="form-control" id="inputHour" disabled>
+						</div>
+					</div>
+					<div class="form-group">
+						<label for="inputReason" class="col-sm-2 control-label">대관 사유</label>
+						<div class="col-sm-10">
+							<input type="text" class="form-control" id="inputReason" maxlength="100" placeholder="대관 사유" autocomplete="off">
+						</div>
+					</div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
+				<button type="button" class="btn btn-primary" role="write"></button>
+			</div>
+		</div>
+	</div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog" aria-labelledby="confirmModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+				<h3 class="modal-title" id="confirmModalLabel">강의실 대관 삭제</h3>
+			</div>
+			<div class="modal-body">
+				<dl class="dl-horizontal">
+					<dt>대관 날짜</dt>
+					<dd class="rent_date"></dd>
+					<dt>강의실</dt>
+					<dd class="classroom_name"></dd>
+					<dt>대관 시간</dt>
+					<dd class="rent_hour"></dd>
+					<dt>대관 사유</dt>
+					<dd class="rent_reason"></dd>
+					<dt>대관자</dt>
+					<dd class="rent_user"></dd>
+				</dl>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-default" data-dismiss="modal">닫기</button>
+				<button type="button" class="btn btn-danger" role="delete">삭제</button>
+			</div>
+		</div>
+	</div>
+</div>
 {% endblock %}
