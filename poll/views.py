@@ -286,6 +286,9 @@ def poll_register(request):
 		if len(view_name) > 50:
 			err_list.append('국문 이름이 너무 깁니다. (최대 글자: 50)')
 
+		if maximum_choice_count < 0:
+			err_list.append('최대 선택 개수가 음수입니다.')
+
 		for choice in choices:
 			if len(choice) > 20:
 				err_list.append(u'선택지 "%s"의 길이가 너무 깁니다. (최대 글자: 20)'%choice)
@@ -305,4 +308,4 @@ def poll_register(request):
 		return HttpResponseRedirect('/poll/%s/'%name)
 
 
-	return render_to_response('poll/register.html', RequestContext(request, {}))
+	return render_to_response('poll/register.html', RequestContext(request, {'regular_only': True, 'only_choice': True, 'result_hide': True}))
