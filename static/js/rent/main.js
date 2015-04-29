@@ -21,6 +21,7 @@ var get_list = function(){
 
 $(function(){
 	$('#input-date').datetimepicker({
+		dayViewHeaderFormat: 'YYYY년 MMMM',
 		daysOfWeekDisabled: [0, 6],
 		minDate: min_date,
 		maxDate: max_date,

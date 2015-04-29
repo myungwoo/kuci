@@ -43,6 +43,7 @@ urlpatterns = patterns('',
     url(r'^board/(?P<board_name>\w+)/comment/write/(?P<article_num>\d+)/$', board_comment_write),
 
     url(r'^poll/$', poll_list),
+    url(r'^poll/register/$', poll_register),
     url(r'^poll/(?P<poll_name>\w+)/$', poll_view),
     url(r'^poll/(?P<poll_name>\w+)/result/$', poll_result),
     url(r'^poll/(?P<poll_name>\w+)/offline/$', poll_offline),

@@ -6,6 +6,11 @@
 {% endblock %}
 
 {% block script %}
+<script type="text/javascript">
+$('button[type="submit"]').click(function(){
+	if (!confirm('주의!\n정말 등록하시겠습니까?\n명단에 없는 사람은 모두 제적생이 됩니다.')) return false;
+});
+</script>
 {% endblock %}
 
 {% block content %}

@@ -1,0 +1,172 @@
+{% extends "base.html" %}
+
+{% block poll_register_active %} class="active"{% endblock %}
+
+{% block style %}
+<link rel="stylesheet" href="/static/css/bootstrap-datetimepicker.min.css">
+{% endblock %}
+
+{% block script %}
+<script src="/static/js/moment.js" type="text/javascript"></script>
+<script src="/static/js/locale/ko.js" type="text/javascript"></script>
+<script src="/static/js/bootstrap-datetimepicker.min.js" type="text/javascript"></script>
+<script type="text/javascript">
+$('#inputStartTime').datetimepicker({
+	dayViewHeaderFormat: 'YYYY년 MMMM',
+	defaultDate: {% if start_time %}new Date('{{ start_time }}'){% else %}new Date(){% endif %},
+	maxDate: new Date(new Date().getTime() + 2*24*60*60*1000),
+	format: 'YYYY/MM/DD hh:mm',
+	sideBySide: true,
+	showTodayButton: true
+}).on('dp.change', function(ev){
+	var now_date = new Date($(this).data('date'));
+	var end = new Date($('#inputEndTime').data('date'));
+	$('#inputEndTime').data('DateTimePicker').minDate(now_date);
+	if (now_date > end){
+		$('#inputEndTime').data('DateTimePicker').date(now_date);
+	}
+});;
+$('#inputEndTime').datetimepicker({
+	dayViewHeaderFormat: 'YYYY년 MMMM',
+	defaultDate: {% if start_time %}new Date('{{ end_time }}'){% else %}new Date(new Date().getTime() + 2*24*60*60*1000){% endif %},
+	minDate: new Date(),
+	format: 'YYYY/MM/DD hh:mm',
+	sideBySide: true,
+	showTodayButton: true
+}).on('dp.change', function(ev){
+	var now_date = new Date($(this).data('date'));
+	var start = new Date($('#inputStartTime').data('date'));
+	$('#inputStartTime').data('DateTimePicker').maxDate(now_date);
+	if (now_date < start){
+		$('#inputStartTime').data('DateTimePicker').date(now_date);
+	}
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+	<h1>설문조사 및 투표 등록 <small>설문조사 및 투표 등록을 간편하게 하는 페이지입니다.</small></h1>
+</div>
+<div class="alert alert-info" role="alert">
+	<h4>참고! <small>작성 방법</small></h4>
+	<p>영문 이름은 주소에 들어갈 이름입니다. 기존에 있는 이름과 중복되면 안됩니다. <code>https://kuci.korea.ac.kr/poll/(영문 이름)/</code></p>
+	<p>선택지를 줄바꿈으로 구분해서 작성해주세요. 선택지 하나당 최대 길이는 <code>20글자</code> 입니다.</p>
+	<p>예시.</p>
+	<pre>
+선택1
+선택2
+선택3
+</pre>
+</div>
+{% for err in err_list %}
+<div class="alert alert-danger" role="alert">
+	<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+	<strong>에러!</strong> {{ err }}
+</div>
+{% endfor %}
+<form class="form-horizontal" action="." method="POST">
+	{% csrf_token %}
+	<div class="form-group">
+		<label for="inputName" class="col-sm-2 control-label">설문조사 이름 (영문)</label>
+		<div class="col-sm-10">
+			<input type="text" class="form-control" name="name" id="inputName" placeholder="설문조사 이름 (영문)" {% if name %}value="{{ name }}" {% endif %}autocomplete="off" maxlength="40" required>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputViewName" class="col-sm-2 control-label">설문조사 이름 (국문)</label>
+		<div class="col-sm-10">
+			<input type="text" class="form-control" name="view_name" id="inputViewName" placeholder="설문조사 이름 (국문)" {% if view_name %}value="{{ view_name }}" {% endif %}autocomplete="off" maxlength="50" required>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputNeedAuthentication" class="col-sm-2 control-label">본인인증 여부</label>
+		<div class="col-sm-10">
+			<p class="form-control-static">
+				<label style="padding-right: 20px;"><input type="radio" name="need_authentication" value="yes"{% if need_authentication %} checked{% endif %}> 예</label>
+				<label><input type="radio" name="need_authentication" value="no"{% if not need_authentication %} checked{% endif %}> 아니오</label>
+			</p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputDoOfflineVote" class="col-sm-2 control-label">투표 방법</label>
+		<div class="col-sm-10">
+			<p class="form-control-static">
+				<label style="padding-right: 20px;"><input type="radio" name="do_offline_vote" value="no"{% if not do_offline_vote %} checked{% endif %}> 온라인</label>
+				<label><input type="radio" name="do_offline_vote" value="yes"{% if do_offline_vote %} checked{% endif %}> 온라인 및 오프라인</label>
+			</p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputRegularOnly" class="col-sm-2 control-label">유권자</label>
+		<div class="col-sm-10">
+			<p class="form-control-static">
+				<label style="padding-right: 20px;"><input type="radio" name="regular_only" value="yes"{% if regular_only %} checked{% endif %}> 정회원</label>
+				<label><input type="radio" name="regular_only" value="no"{% if not regular_only %} checked{% endif %}> 정회원 및 준회원</label>
+			</p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputOnlyChoice" class="col-sm-2 control-label">선택 종류</label>
+		<div class="col-sm-10">
+			<p class="form-control-static">
+				<label style="padding-right: 20px;"><input type="radio" name="only_choice" value="yes"{% if only_choice %} checked{% endif %}> 단일 선택</label>
+				<label><input type="radio" name="only_choice" value="no"{% if not only_choice %} checked{% endif %}> 복수 선택</label>
+			</p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputMaximumChoiceCount" class="col-sm-2 control-label">최대 선택 개수 (0: 제한 없음)</label>
+		<div class="col-sm-10">
+			<input type="number" class="form-control" name="maximum_choice_count" id="inputMaximumChoiceCount" placeholder="최대 선택 개수" value="{% if maximum_choice_count %}{{ maximum_choice_count }}{% else %}0{% endif %}" required>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputHideVoter" class="col-sm-2 control-label">투표 종류</label>
+		<div class="col-sm-10">
+			<p class="form-control-static">
+				<label style="padding-right: 20px;"><input type="radio" name="hide_voter" value="yes"{% if hide_voter %} checked{% endif %}> 비밀 투표</label>
+				<label><input type="radio" name="hide_voter" value="no"{% if not hide_voter %} checked{% endif %}> 기명 투표</label>
+			</p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputResultHide" class="col-sm-2 control-label">결과 공개</label>
+		<div class="col-sm-10">
+			<p class="form-control-static">
+				<label style="padding-right: 20px;"><input type="radio" name="result_hide" value="no"{% if not result_hide %} checked{% endif %}> 공개</label>
+				<label><input type="radio" name="result_hide" value="yes"{% if result_hide %} checked{% endif %}> 비공개</label>
+			</p>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputStartTime" class="col-sm-2 control-label">시작 시간</label>
+		<div class="col-sm-10">
+			<div class="input-group date" id="inputStartTime">
+				<span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+				<input type="text" class="form-control" name="start_time"></input>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputEndTime" class="col-sm-2 control-label">종료 시간</label>
+		<div class="col-sm-10">
+			<div class="input-group date" id="inputEndTime">
+				<span class="input-group-addon"><i class="glyphicon glyphicon-calendar"></i></span>
+				<input type="text" class="form-control" name="end_time"></input>
+			</div>
+		</div>
+	</div>
+	<div class="form-group">
+		<label for="inputChoices" class="col-sm-2 control-label">선택지</label>
+		<div class="col-sm-10">
+			<textarea class="form-control" id="inputChoices" name="choices" rows="10" required>{{ choices }}</textarea>
+		</div>
+	</div>
+	<div class="form-group">
+		<div class="col-sm-offset-2 col-sm-10">
+			<button type="submit" class="btn btn-primary">등록</button>
+		</div>
+	</div>
+</form>
+{% endblock %}

@@ -16,7 +16,7 @@ from members.models import *
 from permissions import *
 from kuci.functional import *
 
-import os, json, string, random
+import os, json, string, random, datetime, re
 
 def JsonResponse(data):
 	return HttpResponse(json.dumps(data), content_type='application/json')
@@ -244,10 +244,65 @@ def poll_get_voters(request):
 	choice_id = request.POST['choice_id']
 	choice = Choice.objects.get(id=choice_id)
 	poll = choice.poll
-	if poll.hide_voter or poll.result_hide:
+	if poll.hide_voter or (poll.result_hide and not request.user.is_staff):
 		raise PermissionDenied()
 	infos = UserChoiceInfo.objects.filter(choice__id=choice_id).order_by('-id')
 	voters = map(lambda x: x.user.first_name, infos)
 	return JsonResponse({'choice_title': choice.title, 'voters': voters})
 
+@login_required
+def poll_register(request):
+	if not request.user.is_staff:
+		raise PermissionDenied()
 
+	if request.method == 'POST':
+		name = request.POST['name']
+		view_name = request.POST['view_name']
+		need_authentication = (request.POST['need_authentication'] == 'yes')
+		do_offline_vote = (request.POST['do_offline_vote'] == 'yes')
+		regular_only = (request.POST['regular_only'] == 'yes')
+		only_choice = (request.POST['only_choice'] == 'yes')
+		maximum_choice_count = int(request.POST['maximum_choice_count'])
+		hide_voter = (request.POST['hide_voter'] == 'yes')
+		result_hide = (request.POST['result_hide'] == 'yes')
+		start_time = datetime.datetime.strptime(request.POST['start_time'], '%Y/%m/%d %H:%M')
+		end_time = datetime.datetime.strptime(request.POST['end_time'], '%Y/%m/%d %H:%M')
+		choices = [line.strip() for line in request.POST['choices'].strip().split('\n') if line.strip()]
+
+		err_list = []
+		if not re.match('^\w+$', name):
+			err_list.append('영문 이름이 형식에 맞지 않습니다.')
+		else:
+			try:
+				poll = Poll.objects.get(name=name)
+			except:
+				poll = None
+			if poll:
+				err_list.append('영문 이름이 중복됩니다.')
+		if start_time > end_time:
+			err_list.append('시작 시간이 종료 시간보다 늦습니다.')
+		if len(name) > 40:
+			err_list.append('영문 이름이 너무 깁니다. (최대 글자: 40)')
+		if len(view_name) > 50:
+			err_list.append('국문 이름이 너무 깁니다. (최대 글자: 50)')
+
+		for choice in choices:
+			if len(choice) > 20:
+				err_list.append(u'선택지 "%s"의 길이가 너무 깁니다. (최대 글자: 20)'%choice)
+
+		if err_list:
+			return render_to_response('poll/register.html', RequestContext(request, {'err_list': err_list,
+				'name': name, 'view_name': view_name, 'need_authentication': need_authentication,
+				'do_offline_vote': do_offline_vote, 'regular_only': regular_only, 'only_choice': only_choice,
+				'maximum_choice_count': maximum_choice_count, 'hide_voter': hide_voter, 'result_hide': result_hide,
+				'start_time': request.POST['start_time'], 'end_time': request.POST['end_time'], 'choices': request.POST['choices']}))
+
+		poll = Poll.objects.create(name=name, view_name=view_name, need_authentication=need_authentication, do_offline_vote=do_offline_vote,
+			regular_only=regular_only, only_choice=only_choice, maximum_choice_count=maximum_choice_count, hide_voter=hide_voter,
+			result_hide=result_hide, start_time=start_time, end_time=end_time)
+
+		choices = [Choice.objects.create(title=x, poll=poll) for x in choices]
+		return HttpResponseRedirect('/poll/%s/'%name)
+
+
+	return render_to_response('poll/register.html', RequestContext(request, {}))

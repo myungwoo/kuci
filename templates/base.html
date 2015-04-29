@@ -77,7 +77,8 @@
 							<li role="presentation" class="dropdown-header">관리목록</li>
 							<li><a href="/admin/" target="_blank">관리페이지</a></li>
 							<li{% block members_update_active %}{% endblock %}><a href="/members/update">재적생 갱신 및 등록</a></li>
-							<li><a href="/admin/" target="_blank">설문조사 및 투표 등록</a></li>
+							<li{% block poll_register_active %}{% endblock %}><a href="/poll/register/">설문조사 및 투표 등록</a></li>
+							<li><a href="/admin/" target="_blank">일반 강의 등록</a></li>
 							<li class="divider"></li>
 							{% endif %}
 							<li{% block change_info_active %}{% endblock %}><a href="/change_info/">개인정보 변경</a></li>
