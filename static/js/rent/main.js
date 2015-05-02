@@ -20,6 +20,10 @@ var get_list = function(){
 };
 
 $(function(){
+	var date = new Date();
+	while (date.getDay() == 6 || date.getDay() == 0){
+		date.setDate(date.getDate() + 1);
+	}
 	$('#input-date').datetimepicker({
 		dayViewHeaderFormat: 'YYYY년 MMMM',
 		daysOfWeekDisabled: [0, 6],
@@ -32,6 +36,7 @@ $(function(){
 	}).on('dp.change', function(ev){
 		get_list();
 	});
+	$('#input-date').data('DateTimePicker').date(date);
 	get_list();
 });
 
