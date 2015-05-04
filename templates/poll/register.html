@@ -15,7 +15,7 @@ $('#inputStartTime').datetimepicker({
 	dayViewHeaderFormat: 'YYYY년 MMMM',
 	defaultDate: {% if start_time %}new Date('{{ start_time }}'){% else %}new Date(){% endif %},
 	maxDate: new Date(new Date().getTime() + 2*24*60*60*1000),
-	format: 'YYYY/MM/DD hh:mm',
+	format: 'YYYY/MM/DD HH:mm',
 	sideBySide: true,
 	showTodayButton: true
 }).on('dp.change', function(ev){
@@ -30,7 +30,7 @@ $('#inputEndTime').datetimepicker({
 	dayViewHeaderFormat: 'YYYY년 MMMM',
 	defaultDate: {% if start_time %}new Date('{{ end_time }}'){% else %}new Date(new Date().getTime() + 2*24*60*60*1000){% endif %},
 	minDate: new Date(),
-	format: 'YYYY/MM/DD hh:mm',
+	format: 'YYYY/MM/DD HH:mm',
 	sideBySide: true,
 	showTodayButton: true
 }).on('dp.change', function(ev){
