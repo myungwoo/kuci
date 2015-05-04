@@ -275,7 +275,7 @@ def members_update(request):
 				if member.type != 1:
 					member.type = 1
 			except:
-				member = Member.objects.create(number=number, name=name, phone_number=phone_number)
+				member = Member.objects.create(type=1, number=number, name=name, phone_number=phone_number)
 			member.save()
 			member_list1.append(member)
 
@@ -288,7 +288,7 @@ def members_update(request):
 				if member.type != 2:
 					member.type = 2
 			except:
-				member = Member.objects.create(number=number, name=name, phone_number=phone_number)
+				member = Member.objects.create(type=2, number=number, name=name, phone_number=phone_number)
 			member.save()
 			member_list2.append(member)
 		return render_to_response('update_result.html', RequestContext(request, {'members1': member_list1, 'members2': member_list2}))
