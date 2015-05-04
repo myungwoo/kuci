@@ -19,6 +19,7 @@ class Poll(models.Model):
 	result_hide = models.BooleanField(default=True) # 결과 페이지를 숨길 것인지
 	start_time = models.DateTimeField(default=datetime.datetime.now())
 	end_time = models.DateTimeField(default=datetime.datetime.now()+datetime.timedelta(days=2))
+	description = models.TextField(blank=True, null=True)
 	deleted = models.BooleanField(default=False)
 	created_datetime = models.DateTimeField(auto_now_add=True)
 

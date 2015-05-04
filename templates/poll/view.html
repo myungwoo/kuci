@@ -140,6 +140,19 @@
 		</dl>
 	</div>
 </div>
+
+{% if poll.description %}
+<div class="panel panel-warning">
+	<div class="panel-heading">
+		<div class="panel-title">
+			<h3><i class="glyphicon glyphicon-info-sign"></i> {{ poll.view_name }} <small>설명</small></h3>
+		</div>
+	</div>
+	<div class="panel-body">
+		{{ poll.description|safe }}
+	</div>
+</div>
+{% endif %}
 {% if poll.status == "wait" %}
 <div class="text-center">
 	<h3>아직 투표가 시작되지 않았습니다.</h3>

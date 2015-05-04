@@ -267,6 +267,7 @@ def poll_register(request):
 		result_hide = (request.POST['result_hide'] == 'yes')
 		start_time = datetime.datetime.strptime(request.POST['start_time'], '%Y/%m/%d %H:%M')
 		end_time = datetime.datetime.strptime(request.POST['end_time'], '%Y/%m/%d %H:%M')
+		description = request.POST['description']
 		choices = [line.strip() for line in request.POST['choices'].strip().split('\n') if line.strip()]
 
 		err_list = []
@@ -298,11 +299,11 @@ def poll_register(request):
 				'name': name, 'view_name': view_name, 'need_authentication': need_authentication,
 				'do_offline_vote': do_offline_vote, 'regular_only': regular_only, 'only_choice': only_choice,
 				'maximum_choice_count': maximum_choice_count, 'hide_voter': hide_voter, 'result_hide': result_hide,
-				'start_time': request.POST['start_time'], 'end_time': request.POST['end_time'], 'choices': request.POST['choices']}))
+				'start_time': request.POST['start_time'], 'end_time': request.POST['end_time'], 'description': description, 'choices': request.POST['choices']}))
 
 		poll = Poll.objects.create(name=name, view_name=view_name, need_authentication=need_authentication, do_offline_vote=do_offline_vote,
 			regular_only=regular_only, only_choice=only_choice, maximum_choice_count=maximum_choice_count, hide_voter=hide_voter,
-			result_hide=result_hide, start_time=start_time, end_time=end_time)
+			result_hide=result_hide, start_time=start_time, end_time=end_time, description=description)
 
 		choices = [Choice.objects.create(title=x, poll=poll) for x in choices]
 		return HttpResponseRedirect('/poll/%s/'%name)
