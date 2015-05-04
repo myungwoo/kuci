@@ -76,7 +76,7 @@ class Article(models.Model):
 class Comment(models.Model):
 	article = models.ForeignKey(Article)
 	user = models.ForeignKey(User)
-	writer_name = models.CharField(max_length=20)
+	writer_name = models.CharField(max_length=20, blank=True, null=True)
 	content = models.TextField()
 	deleted = models.BooleanField(default=False)
 	created_datetime = models.DateTimeField(auto_now_add=True)
