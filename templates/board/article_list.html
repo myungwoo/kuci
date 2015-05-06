@@ -111,7 +111,7 @@ $(function(){
 </div>
 <div class="row text-center">
 	<ul class="pagination">
- 		<li{% if page_num == 1 %} class="disabled"{% endif %}><a{% if page_num > 1 %} href="/board/{{ board.id }}/page1/{% if get_parameters %}?{{ get_parameters }}{% endif %}{% endif %}>&laquo;</a></li>
+ 		<li{% if page_num == 1 %} class="disabled"{% endif %}><a{% if page_num > 1 %} href="/board/{{ board.id }}/page1/{% if get_parameters %}?{{ get_parameters }}{% endif %}"{% endif %}>&laquo;</a></li>
  		{% for page in page_nums %}
  		<li{% ifequal page page_num %} class="active"{% endifequal %}><a href="/board/{{ board.name }}/page{{ page }}/{% if get_parameters %}?{{ get_parameters }}{% endif %}">{{ page }}</a></li>
  		{% endfor %}
